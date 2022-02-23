@@ -9,6 +9,7 @@ python = "^3.10"
 requests = "^2.27.1"
 fastapi = "^0.74.1"
 uvicorn = {version = "^0.17.5", extras = ["standart"]}
+redis = "^4.1.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

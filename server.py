@@ -1,14 +1,17 @@
+import os
+import redis
+
 from fastapi import FastAPI, Path
 from fastapi.responses import RedirectResponse
+
 from pydantic import BaseModel
 
 app = FastAPI()
-
-redirections = {
-    "123": "https://google.com",
-    "345": "https://metu.edu.tr",
-    "cclub": "https://cclub.metu.edu.tr"
-}
+r = redis.Redis(
+  host= os.environ.get('REDIS_HOST'),
+  port= os.environ.get('REDIS_PORT'),
+  password= os.environ.get('REDIS_PASS'),
+)
 
 class Item(BaseModel):
     path: str
@@ -16,14 +19,14 @@ class Item(BaseModel):
 
 @app.post("/save")
 async def save_endpoint(item: Item):
-    redirections[item.path] = item.url
+    r.set(item.path, item.url)
 
     return "Saved"
 
-
 @app.get("/{path}")
 async def redirect_endpoint(path = Path(None)):
-    if path in redirections:
-        return RedirectResponse(redirections[path])
+    url = r.get(path)
+    if url is not None:
+        return RedirectResponse(url.decode("utf-8"))
 
     return "Not Found"
